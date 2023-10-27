@@ -1,5 +1,6 @@
 import "package:amazon_clone_app/common/widgets/custom_button.dart";
 import "package:amazon_clone_app/common/widgets/custom_textfield.dart";
+import "package:amazon_clone_app/constants/utils.dart";
 import "package:amazon_clone_app/features/auth/services/auth_services.dart";
 import "package:flutter/material.dart";
 
@@ -41,6 +42,13 @@ class _AuthScreenState extends State<AuthScreen> {
       context: context,
       email: _emailController.text,
       name: _nameController.text,
+      password: _passwordController.text,
+    );
+  }
+  void signIpUser() {
+    authService.signInUser(
+      context: context,
+      email: _emailController.text,
       password: _passwordController.text,
     );
   }
@@ -117,7 +125,11 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                       CustomButton(
                         text: "Sign Up",
-                        onTab: () {},
+                        onTap: () {
+                          if (_signUpFormKey.currentState!.validate()) {
+                            signUpUser();
+                          }
+                        },
                       )
                     ],
                   ),
@@ -167,12 +179,8 @@ class _AuthScreenState extends State<AuthScreen> {
                         height: 10,
                       ),
                       CustomButton(
-                        text: "Sign Up",
-                        onTab: () {
-                          if (_signInFormKey.currentState!.validate()) {
-                            signUpUser();
-                          }
-                        },
+                        text: "Sign-In",
+                        onTap: () {},
                       )
                     ],
                   ),
