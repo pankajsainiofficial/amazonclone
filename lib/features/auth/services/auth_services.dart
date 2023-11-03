@@ -3,7 +3,12 @@ import 'dart:convert';
 import 'package:amazon_clone_app/constants/error_handling.dart';
 import 'package:amazon_clone_app/constants/global_variables.dart';
 import 'package:amazon_clone_app/constants/utils.dart';
+import 'package:amazon_clone_app/features/home/screens/home_screen.dart';
+import 'package:amazon_clone_app/providers/user_provider.dart';
 import 'package:flutter/material.dart';
+
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import "../../../models/user.dart";
 import 'package:http/http.dart' as http;
@@ -23,7 +28,7 @@ class AuthService {
         address: '',
         type: '',
         token: '',
-        cart: [],
+        
       );
       http.Response res = await http.post(
         Uri.parse('$uri/api/signup'),
@@ -33,7 +38,7 @@ class AuthService {
         },
       );
       // ignore: use_build_context_synchronously
-      httpErrorhandler(
+      httpErrorhandle(
         response: res,
         context: context,
         onSuccess: () {
@@ -47,13 +52,15 @@ class AuthService {
       showSnackBar(context, e.toString());
     }
   }
-  void signInUser(
-      {required BuildContext context,
-      required String email,
-      required String password}) async {
+
+  void signInUser({
+    required BuildContext context,
+    required String email,
+    required String password,
+  }) async {
     try {
       http.Response res = await http.post(
-        Uri.parse('$uri/api/signup'),
+        Uri.parse('$uri/api/signin'),
         body: jsonEncode({
           'email': email,
           'password': password,
@@ -62,14 +69,20 @@ class AuthService {
           'Content-Type': 'application/json; charset=UTF-8'
         },
       );
+
       // ignore: use_build_context_synchronously
-      httpErrorhandler(
+      httpErrorhandle(
         response: res,
         context: context,
-        onSuccess: () {
-          showSnackBar(
+        onSuccess: () async {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          Provider.of<UserProvider>(context, listen: false).setUser(res.body);
+          await prefs.setString('x-auth-token', jsonDecode(res.body)['token']);
+          // ignore: use_build_context_synchronously
+          Navigator.pushNamedAndRemoveUntil(
             context,
-            'Account is created Successfully, Login with the same credentials !',
+            HomeScreen.routeName,
+            (route) => false,
           );
         },
       );
